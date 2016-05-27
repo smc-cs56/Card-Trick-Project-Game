@@ -35,17 +35,28 @@ public class JYCardTrick extends JFrame implements ActionListener {
 	private List<String> selectedCards;
 	private int nSelectedGroup;
 
+private JButton close;
 	// Player can only click a button twice
 	private int buttonPressedCounter = 0;
 	
 	// JPanel for game. JFrame should be from Menu GUI. JButton - groups
 	private  JPanel panel = new JPanel();
+	
+	
+	
+	
+		
 	//private  JFrame frame = new JFrame();
 	private List<JButton> groupButtons = new ArrayList<JButton>();
 
 	private static JYCardTrick singletonCardTrick = null;//new JYCardTrick();
 
-	private JYCardTrick() {
+	private JYCardTrick() 
+	{
+		
+	
+   
+		
 		this.setSize(600, 600);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -81,6 +92,10 @@ public class JYCardTrick extends JFrame implements ActionListener {
 	*/
 	public void showCardsByGroup(Map<String, Integer> mapData)
 	{
+		
+	
+		
+		
 		int fourCardsOneRow = 0; // if four cards one row, add JButton
 		int index = 0; // used for groupButtons[]
 
@@ -112,7 +127,21 @@ public class JYCardTrick extends JFrame implements ActionListener {
 	* Checks which group was chosen
 	*/
 	public void actionPerformed(ActionEvent e) {
-
+				
+	
+	
+	
+	
+	
+		if(e.getSource()==close)
+ 		{
+			
+			dispose();
+			TestMenu menu = new TestMenu();
+			
+ 		}
+		
+		
 		for (int nIndex = 0; nIndex < nGroupNumber; nIndex++)
 		{
 			if ( (buttonPressedCounter != 2) && (e.getSource() == groupButtons.get(nIndex)) ) {
@@ -126,6 +155,11 @@ public class JYCardTrick extends JFrame implements ActionListener {
 			for (Map.Entry<String, Integer> entry : mapCards.entrySet()) {
 				if (entry.getKey() == selectedCards.get(nSelectedGroup - 1)) {
 					JOptionPane.showMessageDialog(null, "Your card is " + entry.getKey());
+					TestMenu menu = new TestMenu();
+					dispose();
+		
+		
+					
 					break;
 					// I want this to be an image of the card instead.
 				}
@@ -153,10 +187,12 @@ public class JYCardTrick extends JFrame implements ActionListener {
 
 	public JPanel getPanel() {
 		return panel;
+		
 	}
 
 	private void setPanel() {
 		this.panel = new JPanel();
+		
 	}
 
 	// Singleton class fo dat ass bruh
@@ -168,11 +204,11 @@ public class JYCardTrick extends JFrame implements ActionListener {
 		return singletonCardTrick;
 	}
 
-	//public static void main(String[] args) {
+	public static void main(String[] args) {
 
-	//	JYCardTrick cardTrick = new JYCardTrick();
+		JYCardTrick cardTrick = new JYCardTrick();
 
-	//}
+	}
 
 	
 }
