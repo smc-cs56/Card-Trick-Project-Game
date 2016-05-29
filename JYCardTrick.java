@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.Dimension;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JOptionPane;
@@ -103,7 +103,7 @@ public class JYCardTrick extends JFrame implements ActionListener {
 		}
 		
 		int cardIndex = 0;
-		gbc.insets = new Insets(10, 10, 10, 10); // spacing
+		gbc.insets = new Insets(15, 15, 15, 15); // spacing
 
 		// add the cards and buttons onto the panel
 		while (cardIndex != theCards.size()) {
@@ -115,17 +115,26 @@ public class JYCardTrick extends JFrame implements ActionListener {
 					
 					if (gbc.gridx == 3) { // four cards one row, add button
 						gbc.gridx = 4;
+						gbc.gridheight = 1; // takes up one space high
+						gbc.fill = GridBagConstraints.VERTICAL;
 						this.panel.add(this.groupButtons.get(index++), gbc);
 					}
 				}
 			}
 		}
 
+		JLabel backToMenu = new JLabel("Back to Menu: ");
 		gbc.gridy = 4;
-		gbc.gridx = 4;
+		gbc.gridx = 0;
+		this.panel.add(backToMenu, gbc);
+
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridy = 4;
+		gbc.gridx = 1;
+		gbc.gridwidth = 4; // takes up four spaces wide
 		this.panel.add(groupButtons.get(4), gbc); // add close button, 5th row, 5th column
 
-		this.panel.setBackground(Color.gray);
+		//this.panel.setBackground(Color.gray);
 		this.add(panel);
 		this.setVisible(true);
 	}
