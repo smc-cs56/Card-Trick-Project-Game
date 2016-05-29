@@ -15,11 +15,13 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Dimension;
 import java.awt.Color;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JOptionPane;
@@ -27,38 +29,29 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 
-// Maybe its easier if we just use multiple JFrames
 public class JYCardTrick extends JFrame implements ActionListener {
 	protected final int nGroupNumber = 4;
 	protected final int nCardNumber = 4;
 	private Map<String, Integer> mapCards;
 	private List<String> selectedCards;
 	private int nSelectedGroup;
+	private JFrame userCard = new JFrame("Your Card");
+	private JPanel userCardPanel = new JPanel();
 
-private JButton close;
 	// Player can only click a button twice
 	private int buttonPressedCounter = 0;
 	
 	// JPanel for game. JFrame should be from Menu GUI. JButton - groups
 	private  JPanel panel = new JPanel();
-	
-	
-	
-	
-		
 	//private  JFrame frame = new JFrame();
 	private List<JButton> groupButtons = new ArrayList<JButton>();
 
 	private static JYCardTrick singletonCardTrick = null;//new JYCardTrick();
 
-	private JYCardTrick() 
-	{
-		
-	
-   
-		
-		this.setSize(600, 600);
-		this.setLocationRelativeTo(null);
+	private JYCardTrick() {
+		//this.frame.setSize(600, 600);
+		this.setSize(800,600);
+		//this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		for (int nGroup = 1; nGroup <= nGroupNumber; nGroup++)
@@ -66,6 +59,8 @@ private JButton close;
 			JButton button = new JButton("Group " + nGroup);
 			groupButtons.add(button);
 		}
+		JButton button = new JButton("Close");
+		groupButtons.add(button);
 
 		mapCards = JYUtil.createMapData(nGroupNumber, nCardNumber);
 
@@ -92,31 +87,43 @@ private JButton close;
 	*/
 	public void showCardsByGroup(Map<String, Integer> mapData)
 	{
-		
-	
-		
-		
-		int fourCardsOneRow = 0; // if four cards one row, add JButton
 		int index = 0; // used for groupButtons[]
 
 		// JPanels will stack whenever this method is called.
 		// Remove the old JPanel when user selects a group.
 		this.setPanel();
-		this.panel.setLayout(new GridLayout(4, 5));
+		this.panel.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		List<ImageIcon> theCards = new ArrayList<ImageIcon>();
 
 		for (Map.Entry<String, Integer> entry : mapData.entrySet()) {
-
 			// get the cards in card/ directory
-			ImageIcon sampleCard = new ImageIcon("card/" + entry.getKey() + ".png");
-			this.panel.add(new JLabel(sampleCard));
-			fourCardsOneRow++;
+			theCards.add(new ImageIcon("card/" + entry.getKey() + ".png"));
+		}
+		
+		int cardIndex = 0;
+		gbc.insets = new Insets(10, 10, 10, 10); // spacing
 
-			// add button at the end of each row
-			if (fourCardsOneRow == 4) {
-				this.panel.add(this.groupButtons.get(index++));
-				fourCardsOneRow = 0; 
+		// add the cards and buttons onto the panel
+		while (cardIndex != theCards.size()) {
+			for (int i = 0; i < 4; i++) {
+				gbc.gridy = i;
+				for (int j = 0; j < 4; j++) {
+					gbc.gridx = j;
+					this.panel.add(new JLabel(theCards.get(cardIndex++)), gbc);
+					
+					if (gbc.gridx == 3) { // four cards one row, add button
+						gbc.gridx = 4;
+						this.panel.add(this.groupButtons.get(index++), gbc);
+					}
+				}
 			}
 		}
+
+		gbc.gridy = 4;
+		gbc.gridx = 4;
+		this.panel.add(groupButtons.get(4), gbc); // add close button, 5th row, 5th column
 
 		this.panel.setBackground(Color.gray);
 		this.add(panel);
@@ -127,21 +134,7 @@ private JButton close;
 	* Checks which group was chosen
 	*/
 	public void actionPerformed(ActionEvent e) {
-				
-	
-	
-	
-	
-	
-		if(e.getSource()==close)
- 		{
-			
-			dispose();
-			TestMenu menu = new TestMenu();
-			
- 		}
-		
-		
+
 		for (int nIndex = 0; nIndex < nGroupNumber; nIndex++)
 		{
 			if ( (buttonPressedCounter != 2) && (e.getSource() == groupButtons.get(nIndex)) ) {
@@ -150,24 +143,12 @@ private JButton close;
 			}
 		}
 
-		// display user card.
-		if (buttonPressedCounter == 2) {
-			for (Map.Entry<String, Integer> entry : mapCards.entrySet()) {
-				if (entry.getKey() == selectedCards.get(nSelectedGroup - 1)) {
-					JOptionPane.showMessageDialog(null, "Your card is " + entry.getKey());
-					TestMenu menu = new TestMenu();
-					dispose();
-		
-		
-					
-					break;
-					// I want this to be an image of the card instead.
-				}
-			}
-		}
-
-		// Replace shuffles the deck after choosing a group
-		if (buttonPressedCounter < 2){
+		if (e.getSource() == groupButtons.get(4)) { // if close, open TestMenu
+			singletonCardTrick = null; // can instantiate only one time. Need to set to null again.
+			this.dispose();
+			userCard.dispose();
+			new TestMenu();
+		} else if (buttonPressedCounter < 2) { // shuffle deck
 			selectedCards = JYUtil.getKeyFromValue(mapCards, nSelectedGroup);
 
 			// Create new groups and split selected group cards
@@ -176,23 +157,39 @@ private JButton close;
 			// Sort cards by group
 			mapCards = JYUtil.sortByComparator(mapCards);
 
+			//this.frame.remove(panel); 
 			this.remove(panel);
 			this.showCardsByGroup(mapCards);
 
 			if (buttonPressedCounter == 1) {
+				ImageIcon backCard = new ImageIcon("500.png");
 				JOptionPane.showMessageDialog(null, "Where is your card? Select a group(1~" + nGroupNumber + "): ");
+			}
+		} else if (buttonPressedCounter == 2) { // show user card
+			for (Map.Entry<String, Integer> entry : mapCards.entrySet()) {
+				if (entry.getKey() == selectedCards.get(nSelectedGroup - 1)) {
+					ImageIcon sampleCard = new ImageIcon("card/" + entry.getKey() + ".png");
+					JLabel text = new JLabel("Your card is: ");
+
+					userCardPanel.add(text);
+					userCardPanel.add(new JLabel(sampleCard));
+					userCard.add(userCardPanel);
+					userCard.pack();
+					userCard.setVisible(true);
+					buttonPressedCounter++;
+//					userCard.setDefaultCloseOperation(EXIT_ON_CLOSE);
+					break;
+				}
 			}
 		}
 	}
 
 	public JPanel getPanel() {
 		return panel;
-		
 	}
 
 	private void setPanel() {
 		this.panel = new JPanel();
-		
 	}
 
 	// Singleton class fo dat ass bruh
@@ -202,13 +199,16 @@ private JButton close;
 		}
 
 		return singletonCardTrick;
+
+		// when closing it should I set singletonCardTrick back to null?
+		// be able to repeat this stuff
 	}
 
-	public static void main(String[] args) {
+	//public static void main(String[] args) {
 
-		JYCardTrick cardTrick = new JYCardTrick();
+	//	JYCardTrick cardTrick = new JYCardTrick();
 
-	}
+	//}
 
 	
 }
